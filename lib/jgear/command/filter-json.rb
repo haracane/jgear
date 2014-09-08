@@ -1,7 +1,16 @@
 require "json"
+require "optparse"
+
+inverse_flag = false
+
+op = OptionParser.new
+
+op.on("-v") { inverse_flag = true }
+
+op.parse!(ARGV)
 
 combined_key = ARGV[0].split(/\./)
-filter_pattern = /#{Regexp.escape(ARGV[1])}/
+filter_pattern = /#{ARGV[1]}/
 
 STDIN.each do |line|
   record = JSON.parse(line)
@@ -19,5 +28,5 @@ STDIN.each do |line|
     break if value.nil?
   end
 
-  print line if filter_pattern =~ value
+  print line if !!(filter_pattern =~ value) ^ inverse_flag
 end
