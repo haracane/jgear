@@ -1,32 +1,28 @@
 require "json"
 require "optparse"
+require "jgear/entity"
 
 inverse_flag = false
+strict_flag = false
 
 op = OptionParser.new
 
 op.on("-v") { inverse_flag = true }
+op.on("--strict") { strict_flag = true }
 
 op.parse!(ARGV)
 
-combined_key = ARGV[0].split(/\./)
+key = ARGV[0]
 filter_pattern = /#{ARGV[1]}/
+filter_text = ARGV[1]
 
 STDIN.each do |line|
-  record = JSON.parse(line)
-  output_record = {}
-
-  value = record
-  combined_key.each do |key|
-    if value.respond_to?(key)
-      value = value.send(key)
-    elsif value.is_a?(Array)
-      value = value[key.to_i]
-    else
-      value = value[key]
-    end
-    break if value.nil?
+  entity = Jgear::Entity.parse_json(line)
+  value = entity[key]
+  if strict_flag
+    result_flag = (filter_text == value)
+  else
+    result_flag =  !!(filter_pattern =~ value)
   end
-
-  print line if !!(filter_pattern =~ value) ^ inverse_flag
+  print line if result_flag ^ inverse_flag
 end

@@ -1,0 +1,3 @@
+#!/usr/bin/env ruby
+$:.push File.expand_path("../../lib", __FILE__)
+require "jgear/command/#{__FILE__.split(/\//)[-1]}"
